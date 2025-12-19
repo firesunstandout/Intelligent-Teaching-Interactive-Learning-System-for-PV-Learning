@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renewable PV - Knowledge Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; background: #0b0f19; overflow: hidden; font-family: "Microsoft YaHei", sans-serif; }
+        #main { width: 100vw; height: 100vh; }
+        .legend-info {
+            position: absolute;
+            top: 20px; left: 20px;
+            color: #ccc;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        h1 { font-size: 20px; margin: 0 0 10px 0; color: #fff; text-shadow: 0 0 10px rgba(0,210,255,0.5); }
+        p { font-size: 12px; margin: 5px 0; color: #aaa; }
+    </style>
+</head>
+<body>
+    <div class="legend-info">
+        <h1>PV Knowledge Graph</h1>
+        <p>● Drag nodes to reposition</p>
+        <p>● Hover nodes to see relationships</p>
+        <p>● Scroll to zoom for details</p>
+    </div>
+    <div id="main"></div>
+
+    <script>
+        const chartDom = document.getElementById('main');
+        const myChart = echarts.init(chartDom);
+
+        // --- 1. Define categories ---
+        const categories = [
+            { name: 'Core Principles', itemStyle: { color: '#ff4d4f' } },
+            { name: 'Hardware', itemStyle: { color: '#faad14' } },
+            { name: 'Control Algorithms', itemStyle: { color: '#1890ff' } },
+            { name: 'Key Characteristics', itemStyle: { color: '#722ed1' } },
+            { name: 'System Applications', itemStyle: { color: '#52c41a' } }
+        ];
+
+        // --- 2. Define nodes (symbolSize = importance) ---
+        const nodes = [
+            // Core principles
+            { name: 'Photovoltaic Power', category: 0, symbolSize: 60, label: { fontSize: 20, fontWeight: 'bold' } },
+            { name: 'Photovoltaic Effect', category: 0, symbolSize: 40 },
+            { name: 'PN Junction', category: 0, symbolSize: 35 },
+            { name: 'Carrier Transport', category: 0, symbolSize: 25 },
+            
+            // Hardware
+            { name: 'PV Cell', category: 1, symbolSize: 45 },
+            { name: 'Monocrystalline Silicon', category: 1, symbolSize: 30 },
+            { name: 'Polycrystalline Silicon', category: 1, symbolSize: 30 },
+            { name: 'PV Module', category: 1, symbolSize: 40 },
+            { name: 'Grid-Tied Inverter', category: 1, symbolSize: 45 },
+            { name: 'DC/DC Converter', category: 1, symbolSize: 35 },
+            { name: 'Battery', category: 1, symbolSize: 30 },
+
+            // Key characteristics
+            { name: 'I-V Curve', category: 3, symbolSize: 40 },
+            { name: 'P-V Curve', category: 3, symbolSize: 40 },
+            { name: 'Maximum Power Point (MPP)', category: 3, symbolSize: 45 },
+            { name: 'Open-Circuit Voltage', category: 3, symbolSize: 25 },
+            { name: 'Short-Circuit Current', category: 3, symbolSize: 25 },
+            { name: 'Fill Factor', category: 3, symbolSize: 25 },
+            { name: 'Ambient Temperature', category: 3, symbolSize: 30 },
+            { name: 'Irradiance', category: 3, symbolSize: 30 },
+
+            // Control algorithms
+            { name: 'MPPT Control', category: 2, symbolSize: 50 },
+            { name: 'Constant Voltage Method', category: 2, symbolSize: 30 },
+            { name: 'Perturb & Observe', category: 2, symbolSize: 35 },
+            { name: 'Incremental Conductance', category: 2, symbolSize: 35 },
+            { name: 'SPWM Control', category: 2, symbolSize: 30 },
+
+            // System applications
+            { name: 'PV System', category: 4, symbolSize: 50 },
+            { name: 'Off-Grid System', category: 4, symbolSize: 35 },
+            { name: 'Grid-Tied System', category: 4, symbolSize: 40 },
+            { name: 'Distributed Plant', category: 4, symbolSize: 30 },
+            { name: 'Utility-Scale Plant', category: 4, symbolSize: 30 },
+            { name: 'Islanding Effect', category: 4, symbolSize: 30 }
+        ];
+
+        // --- 3. Define relationships (verbs as edges) ---
+        const links = [
+            // Core principles
+            { source: 'Photovoltaic Power', target: 'Photovoltaic Effect', value: 'based on' },
+            { source: 'Photovoltaic Effect', target: 'PN Junction', value: 'core structure' },
+            { source: 'PN Junction', target: 'Carrier Transport', value: 'microscopic mechanism' },
+            { source: 'Photovoltaic Effect', target: 'PV Cell', value: 'application' },
+            
+            // Materials & hardware
+            { source: 'PV Cell', target: 'Monocrystalline Silicon', value: 'category' },
+            { source: 'PV Cell', target: 'Polycrystalline Silicon', value: 'category' },
+            { source: 'PV Cell', target: 'PV Module', value: 'encapsulation' },
+            { source: 'PV Module', target: 'I-V Curve', value: 'expressed as' },
+
+            // Characteristics & environment
+            { source: 'I-V Curve', target: 'Open-Circuit Voltage', value: 'parameter' },
+            { source: 'I-V Curve', target: 'Short-Circuit Current', value: 'parameter' },
+            { source: 'I-V Curve', target: 'P-V Curve', value: 'derived to' },
+            { source: 'P-V Curve', target: 'Maximum Power Point (MPP)', value: 'contains' },
+            
+            // Environment impact
+            { source: 'Ambient Temperature', target: 'Open-Circuit Voltage', value: 'negatively affects' },
+            { source: 'Irradiance', target: 'Short-Circuit Current', value: 'positively affects' },
+            { source: 'Ambient Temperature', target: 'Maximum Power Point (MPP)', value: 'shifts position' },
+            { source: 'Irradiance', target: 'Maximum Power Point (MPP)', value: 'changes magnitude' },
+
+            // Algorithms
+            { source: 'MPPT Control', target: 'Maximum Power Point (MPP)', value: 'tracks' },
+            { source: 'MPPT Control', target: 'DC/DC Converter', value: 'adjusts duty cycle' },
+            { source: 'MPPT Control', target: 'Perturb & Observe', value: 'algorithm' },
+            { source: 'MPPT Control', target: 'Incremental Conductance', value: 'algorithm' },
+            { source: 'MPPT Control', target: 'Constant Voltage Method', value: 'algorithm' },
+
+            // System integration
+            { source: 'Photovoltaic Power', target: 'PV System', value: 'builds' },
+            { source: 'PV System', target: 'Grid-Tied Inverter', value: 'core device' },
+            { source: 'Grid-Tied Inverter', target: 'SPWM Control', value: 'modulation' },
+            { source: 'Grid-Tied Inverter', target: 'Islanding Effect', value: 'requires protection' },
+            { source: 'PV System', target: 'Off-Grid System', value: 'type' },
+            { source: 'PV System', target: 'Grid-Tied System', value: 'type' },
+            { source: 'Off-Grid System', target: 'Battery', value: 'required' },
+            { source: 'Grid-Tied System', target: 'Distributed Plant', value: 'form' },
+            { source: 'Grid-Tied System', target: 'Utility-Scale Plant', value: 'form' }
+        ];
+
+        // --- 4. Chart options ---
+        const option = {
+            backgroundColor: '#0b0f19',
+            
+            tooltip: {
+                trigger: 'item',
+                formatter: function(params) {
+                    if (params.dataType === 'edge') {
+                        return `${params.data.source} <span style="color:#aaa">--[${params.data.value}]--></span> ${params.data.target}`;
+                    }
+                    return `<div style="font-weight:bold">${params.name}</div>Type: ${params.marker} ${params.data.category < categories.length ? categories[params.data.category].name : 'Unknown'}`;
+                },
+                backgroundColor: 'rgba(50,50,50,0.9)',
+                borderColor: '#333',
+                textStyle: { color: '#fff' }
+            },
+
+            legend: {
+                data: categories.map(a => a.name),
+                textStyle: { color: '#ccc' },
+                bottom: 20,
+                icon: 'circle'
+            },
+
+            series: [{
+                type: 'graph',
+                layout: 'force',
+                data: nodes,
+                links: links,
+                categories: categories,
+                
+                // Interaction
+                roam: true,
+                draggable: true,
+                focusNodeAdjacency: true,
+                emphasis: {
+                    focus: 'adjacency',
+                    lineStyle: { width: 4 }
+                },
+
+                symbol: 'circle',
+                itemStyle: {
+                    borderColor: '#fff',
+                    borderWidth: 1,
+                    shadowBlur: 10,
+                    shadowColor: 'rgba(0,0,0,0.5)'
+                },
+                
+                label: {
+                    show: true,
+                    position: 'right',
+                    formatter: '{b}',
+                    color: '#fff',
+                    fontSize: 12
+                },
+
+                lineStyle: {
+                    color: 'source',
+                    curveness: 0.3,
+                    width: 1.5,
+                    opacity: 0.7
+                },
+                
+                edgeLabel: {
+                    show: true,
+                    formatter: function(x) { return x.data.value; },
+                    fontSize: 10,
+                    color: '#888',
+                    backgroundColor: '#0b0f19',
+                    borderRadius: 3,
+                    padding: [2, 4]
+                },
+
+                edgeSymbol: ['none', 'arrow'],
+                edgeSymbolSize: [0, 8],
+
+                force: {
+                    repulsion: 400,
+                    gravity: 0.05,
+                    edgeLength: [80, 200],
+                    layoutAnimation: true
+                }
+            }]
+        };
+
+        myChart.setOption(option);
+        
+        // 响应式
+        window.onresize = function() {
+            myChart.resize();
+        };
+    </script>
+</body>
+</html>

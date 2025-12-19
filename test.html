@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test</title>
+</head>
+
+<body>
+    <h1>Debug Test</h1>
+    <button id="test-btn">Test Data Load</button>
+    <pre id="output"></pre>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('test-btn').addEventListener('click', () => {
+            const output = document.getElementById('output');
+            const tests = [];
+
+            tests.push('=== Testing Data ===');
+            tests.push('siteData exists: ' + (typeof siteData !== 'undefined'));
+            if (typeof siteData !== 'undefined') {
+                tests.push('knowledgeCards count: ' + (siteData.knowledgeCards ? siteData.knowledgeCards.length : 'undefined'));
+                tests.push('qna count: ' + (siteData.qna ? siteData.qna.length : 'undefined'));
+                tests.push('practice count: ' + (siteData.practice ? siteData.practice.length : 'undefined'));
+            }
+
+            tests.push('\n=== Testing Functions ===');
+            tests.push('initKnowledgeCards exists: ' + (typeof initKnowledgeCards !== 'undefined'));
+            tests.push('toggleAnimation exists: ' + (typeof toggleAnimation !== 'undefined'));
+            tests.push('initExperiment exists: ' + (typeof initExperiment !== 'undefined'));
+            tests.push('initExperiment2 exists: ' + (typeof initExperiment2 !== 'undefined'));
+
+            tests.push('\n=== Testing State ===');
+            tests.push('state exists: ' + (typeof state !== 'undefined'));
+            if (typeof state !== 'undefined') {
+                tests.push('state.isAnimating: ' + state.isAnimating);
+                tests.push('state.particles: ' + state.particles.length);
+            }
+
+            output.textContent = tests.join('\n');
+        });
+    </script>
+</body>
+
+</html>
